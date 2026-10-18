@@ -1,13 +1,13 @@
-// Guarda cada itinerario abierto para verlo sin internet. Con conexión trae siempre la versión más reciente;
-// sin conexión (o si tarda más de 6 s) muestra la guardada.
-const CACHE = 'itinerarios';
+// Guarda cada itinerario abierto para verlo sin internet. Con conexión trae siempre la versión más reciente
+// (pregunta al servidor sin usar la copia guardada del navegador); sin conexión (o si tarda más de 6 s) muestra la guardada.
+const CACHE = 'itinerarios-v2';
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {
   const r = e.request, url = new URL(r.url);
   if (r.method !== 'GET' || url.origin !== location.origin) return;
   const guardada = () => caches.match(url.pathname).then(m => m || caches.match(r));
-  const red = fetch(r).then(res => { if (res.ok) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(url.pathname, copia)); } return res; });
+  const red = fetch(url.href, { cache: 'no-cache', credentials: 'same-origin' }).then(res => { if (res.ok) { const copia = res.clone(); caches.open(CACHE).then(c => c.put(url.pathname, copia)); } return res; });
   e.respondWith(new Promise(listo => {
     let hecho = false;
     const dar = res => { if (!hecho && res) { hecho = true; listo(res); } };
