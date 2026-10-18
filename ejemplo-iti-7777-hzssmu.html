@@ -267,7 +267,7 @@ summary{list-style:none;display:flex;align-items:center;gap:12px;padding:16px 18
 
   // Publicado en GitHub Pages: queda guardado en el celular para abrirlo sin señal
   if ('serviceWorker' in navigator && location.protocol === 'https:' && /\.github\.io$/.test(location.hostname)) {
-    navigator.serviceWorker.register('sw.js').then(function () { if (window.caches) caches.open('itinerarios').then(function (c) { c.add(location.pathname); }); }).catch(function () {});
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(function () { if (window.caches) caches.open('itinerarios-v2').then(function (c) { c.add(new Request(location.pathname, { cache: 'no-cache' })); }); }).catch(function () {});
   }
 })();
 </script>
